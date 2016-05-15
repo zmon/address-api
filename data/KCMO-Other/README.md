@@ -128,7 +128,7 @@ CREATE TABLE address_spatial.kcmo_tiff (
   status varchar,
   amendment varchar,
   lastupdate timestamp,
-  geom geometry,
+  geom geometry(MultiPolygon),
   CONSTRAINT pk_kcmo_nhood_fid PRIMARY KEY (fid)
 );
 
