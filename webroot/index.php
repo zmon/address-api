@@ -20,6 +20,52 @@ var_dump($in_state);
 
 });
 
+$app->get('/kcmo_tiffs/V0/', function () use ($app) {
+
+
+
+    if ($dbh = connect_to_spatial_database()) {
+
+        $address = new \Code4KC\Address\Tiff($dbh, true);
+
+        if ($address_recs = $address->findallgeo()) {
+
+            $ret = array(
+                'code' => 200,
+                'status' => 'sucess',
+                'message' => '',
+                'data' => $address_recs
+            );
+
+        } else {
+            $ret = array(
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Address not found',
+                'data' => array()
+            );
+        }
+
+    } else {
+
+        $ret = array(
+            'code' => 500,
+            'status' => 'failed',
+            'message' => 'Unable to connect to database.',
+            'data' => array()
+        );
+    }
+
+
+    $app->response->setStatus($ret['code']);
+
+    if ( $ret['code'] == 200 ) {
+        echo $address_recs[0]['row_to_json'];
+    } else {
+        echo json_encode($ret);
+    }
+});
+
 $app->get('/metro-areas/V0/', function () use ($app) {
 
 
