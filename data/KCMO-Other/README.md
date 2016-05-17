@@ -82,8 +82,8 @@ ogr_fdw_info -s Other.gdb -l IncentiveTaxIncrementFinancing
 CREATE SERVER kcmo_other_server
   FOREIGN DATA WRAPPER ogr_fdw
   OPTIONS (
-    datasource '/var/www/data/KCMO-Other/Other.gdb',
-    format 'OpenFileGDB' );
+    datasource '/var/www/data/KCMO-Other/KCMO_TIF.geojson',
+    format 'GeoJSON' );
 
 CREATE FOREIGN TABLE kcmo_tiff_fdw (
   fid integer,
@@ -92,12 +92,13 @@ CREATE FOREIGN TABLE kcmo_tiff_fdw (
   ordnum varchar,
   status varchar,
   amendment varchar,
-  lastupdate timestamp,
+  lastupdate varchar,
   shape_length real,
   shape_area real )
   SERVER kcmo_other_server
-  OPTIONS ( layer 'IncentiveTaxIncrementFinancing' );
+  OPTIONS ( layer 'OGRGeoJSON' );
 ````
+  lastupdate timestamp,
 
 - [ ] Test
 ````
@@ -127,7 +128,7 @@ CREATE TABLE address_spatial.kcmo_tiff (
   ordnum varchar,
   status varchar,
   amendment varchar,
-  lastupdate timestamp,
+  lastupdate varchar,
   geom geometry(MultiPolygon),
   CONSTRAINT pk_kcmo_nhood_fid PRIMARY KEY (fid)
 );
@@ -140,6 +141,9 @@ INSERT INTO address_spatial.kcmo_tiff
   (fid, name, ordnum, status, amendment, lastupdate)
      SELECT fid, name, ordnum, status, amendment, lastupdate
         FROM kcmo_tiff_fdw;
+
+ALTER TABLE  address_spatial.kcmo_tiff;
+
 
 select fid, name, ordnum, status, amendment, lastupdate from address_spatial.kcmo_tiff LIMIT 10;
 ````
