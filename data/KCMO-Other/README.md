@@ -79,11 +79,14 @@ ogr_fdw_info -s Other.gdb -l IncentiveTaxIncrementFinancing
 ````
 
 ````
+DROP FOREIGN TABLE kcmo_tiff_fdw;
+DROP SERVER kcmo_other_server;
+
 CREATE SERVER kcmo_other_server
   FOREIGN DATA WRAPPER ogr_fdw
   OPTIONS (
-    datasource '/var/www/data/KCMO-Other/KCMO_TIF.geojson',
-    format 'GeoJSON' );
+    datasource '/var/www/data/KCMO-Other/Other.gdb',
+    format 'OpenFileGDB' );
 
 CREATE FOREIGN TABLE kcmo_tiff_fdw (
   fid integer,
@@ -92,13 +95,14 @@ CREATE FOREIGN TABLE kcmo_tiff_fdw (
   ordnum varchar,
   status varchar,
   amendment varchar,
-  lastupdate varchar,
+  lastupdate timestamp,
   shape_length real,
   shape_area real )
   SERVER kcmo_other_server
-  OPTIONS ( layer 'OGRGeoJSON' );
-````
-  lastupdate timestamp,
+  OPTIONS ( layer 'IncentiveTaxIncrementFinancing' );
+
+
+
 
 - [ ] Test
 ````
@@ -122,14 +126,17 @@ select fid, name, ordnum, status, amendment, lastupdate from kcmo_tiff_fdw;
 - [ ] Create spatial table and load
 
 ````
+DROP TABLE address_spatial.kcmo_tiff ;
 CREATE TABLE address_spatial.kcmo_tiff (
-  fid integer,
-  name varchar,
-  ordnum varchar,
-  status varchar,
-  amendment varchar,
-  lastupdate varchar,
-  geom geometry(MultiPolygon),
+   fid integer,
+   geom geometry,
+   name varchar,
+   ordnum varchar,
+   status varchar,
+   amendment varchar,
+   lastupdate varchar,
+   shape_length real,
+   shape_area real ,
   CONSTRAINT pk_kcmo_nhood_fid PRIMARY KEY (fid)
 );
 
@@ -138,11 +145,13 @@ CREATE INDEX idx_kcmo_tiff ON
 USING gist(geom);
 
 INSERT INTO address_spatial.kcmo_tiff
-  (fid, name, ordnum, status, amendment, lastupdate)
-     SELECT fid, name, ordnum, status, amendment, lastupdate
+  (fid, name, ordnum, status, amendment, lastupdate, shape_length, shape_area,geom)
+     SELECT fid, name, ordnum, status, amendment, lastupdate, shape_length, shape_area, geom
         FROM kcmo_tiff_fdw;
 
-ALTER TABLE  address_spatial.kcmo_tiff;
+ALTER TABLE  address_spatial.kcmo_tiff  OWNER TO c4kc;
+
+;
 
 
 select fid, name, ordnum, status, amendment, lastupdate from address_spatial.kcmo_tiff LIMIT 10;
