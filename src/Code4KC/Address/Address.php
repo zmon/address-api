@@ -2,7 +2,7 @@
 
 namespace Code4KC\Address;
 
-use \PDO as PDO;
+use PDO as PDO;
 
 /**
  * Class Address
@@ -131,6 +131,29 @@ class Address extends BaseTable
                 LEFT JOIN address a on a.id = k.address_id
                 LEFT JOIN census_attributes b ON b.city_address_id = k.city_address_id
                 LEFT JOIN county_address_attributes j ON j.id = k.county_address_id
+                LEFT JOIN county_address_data cd ON cd.id = k.county_address_id
+          ';
+
+
+    VAR $all_base_sql = 'SELECT
+                a.id AS address_id,
+                k.city_address_id AS city_id,
+                c.land_bank_property AS city_land_bank_property,
+                k.county_address_id AS county_id,
+                cd.situs_address AS county_situs_address,
+                cd.situs_city AS county_situs_city,
+                cd.situs_state AS county_situs_state,
+                cd.situs_zip AS county_situs_zip,
+                cd.owner AS county_owner,
+                cd.owner_address AS county_owner_address,
+                cd.owner_city AS county_owner_city,
+                cd.owner_state AS county_owner_state,
+                cd.owner_zip AS county_owner_zip
+
+
+                FROM city_address_attributes c
+                LEFT JOIN address_keys k ON k.city_address_id = c.id
+                LEFT JOIN address a on a.id = k.address_id
                 LEFT JOIN county_address_data cd ON cd.id = k.county_address_id
           ';
 
