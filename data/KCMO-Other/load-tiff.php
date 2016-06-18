@@ -8,7 +8,7 @@ ini_set("auto_detect_line_endings", true);
 /**
  * Class Address
  */
-class KCMOLandUse extends \Code4KC\Address\SpatialLoad
+class KCMOTIF extends \Code4KC\Address\SpatialLoad
 {
 
     var $totals = array(
@@ -16,21 +16,30 @@ class KCMOLandUse extends \Code4KC\Address\SpatialLoad
         'tiff' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
     );
 
-    function __construct(&$dbh, $DB_NAME, &$spatial_dbh, $spatial_DB_NAME, $debug = false)
+    function __construct($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS, $debug = false)
     {
 
         if (!$this->valid_cli_options()) {
+
+            print "\nBAD\n";
             $this->help();
         } else {
+print "\n$DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS\n";
 
-            parent::__construct($dbh, $debug, $spatial_dbh, $spatial_DB_NAME);
+            parent::__construct($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS, $debug);
 
-            $this->display_cli_options($DB_NAME, $spatial_DB_NAME);
+        //    $this->display_cli_options($DB_NAME, $spatial_DB_NAME);
 
-            $this->load($dbh);
+            $this->load_spatial();
+            $this->load();
             $this->end_load();
 
         }
+
+    }
+
+
+    function load_spatial() {
 
     }
 
@@ -175,18 +184,6 @@ class KCMOLandUse extends \Code4KC\Address\SpatialLoad
 
 }
 
-try {
-    $dbh = new PDO("pgsql:host=localhost; dbname=$DB_NAME", $DB_USER, $DB_PASS);
-} catch (PDOException $e) {
-    error_log($e->getMessage() . ' ' . __FILE__ . ' ' . __LINE__);
-    return false;
-}
 
-try {
-    $spatial_dbh = new PDO("pgsql:host=localhost; dbname=$DB_CODE4KC_NAME", $DB_CODE4KC_USER, $DB_CODE4KC_PASS);
-} catch (PDOException $e) {
-    error_log($e->getMessage() . ' ' . __FILE__ . ' ' . __LINE__);
-    return false;
-}
 
-$run = new KCMOLandUse($dbh, $DB_NAME, $spatial_dbh, $DB_CODE4KC_NAME);
+$run = new KCMOTIF($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS);

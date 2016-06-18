@@ -253,4 +253,24 @@ class KCMO_Tiff extends BaseTable
 }
 ````
 
+# Process
 
+## Install
+
+1) Install tables, normal and spatial
+2) Fix permissions if nessary
+3) Update from Git
+
+## Load
+1) Download shap file `http://maps.kcmo.org/apps/download/GisDataDownload/Other.gdb.zip`
+2) Create Forign Data Wraper  server
+3) Update spatial table with City, State, ID, Name, and shape
+  * What do we do with ordnum, status, amendment, lastupdate?
+  * Add, Change, Delete
+4) Update address attributes
+  * For eash address, lookup longitude, latituede
+  * Add, Change, Delete
+
+
+
+99) Teardown FWD server

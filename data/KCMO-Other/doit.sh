@@ -84,9 +84,3 @@ cp Other.zip /tmp
 )
 
 
-
-sudo -u postgres psql code4kc < ./load-tiff-start.sql
-
-
-
-sudo -u postgres psql code4kc < ./load-tiff-end.sql
