@@ -1,7 +1,7 @@
 #!/bin/sh
 
 shp2pgsql -g geom \
- -I /var/wwwsites/address_api.codeforkc.org/data/KCNeighborhoods/KCNeighborhoods.shp \
+ -I /var/www/data/KCNeighborhoods/KCNeighborhoods.shp \
  address_spatial.kc_nhood_tmp | psql  -d code4kc
 
 exit

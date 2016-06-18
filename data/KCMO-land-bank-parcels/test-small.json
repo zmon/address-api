@@ -1,0 +1,246 @@
+{
+  "displayFieldName" : "PLATNAME",
+  "fieldAliases" : {
+    "OBJECTID" : "OBJECTID",
+    "KIVAPIN" : "PIN",
+    "LANDUSECODE" : "LANDUSECODE",
+    "APN" : "APN",
+    "ADDRESS" : "ADDRESS",
+    "ADDR" : "ADDR",
+    "FRACTION" : "FRACTION",
+    "PREFIX" : "PREFIX",
+    "STREET" : "STREET",
+    "STREET_TYPE" : "STREET_TYPE",
+    "SUITE" : "SUITE",
+    "OWN_NAME" : "OWN_NAME",
+    "OWN_ADDR" : "OWN_ADDR",
+    "OWN_CITY" : "OWN_CITY",
+    "OWN_STATE" : "OWN_STATE",
+    "OWN_ZIP" : "OWN_ZIP",
+    "SHAPE.AREA" : "SHAPE.AREA",
+    "SHAPE.LEN" : "SHAPE.LEN"
+  },
+  "geometryType" : "esriGeometryPolygon",
+  "spatialReference" : {
+    "wkid" : 102698
+  },
+  "fields" : [
+    {
+      "name" : "OBJECTID",
+      "type" : "esriFieldTypeOID",
+      "alias" : "OBJECTID"
+    },
+    {
+      "name" : "KIVAPIN",
+      "type" : "esriFieldTypeString",
+      "alias" : "PIN",
+      "length" : 20
+    },
+    {
+      "name" : "LANDUSECODE",
+      "type" : "esriFieldTypeSmallInteger",
+      "alias" : "LANDUSECODE"
+    },
+    {
+      "name" : "APN",
+      "type" : "esriFieldTypeString",
+      "alias" : "APN",
+      "length" : 25
+    },
+    {
+      "name" : "ADDRESS",
+      "type" : "esriFieldTypeString",
+      "alias" : "ADDRESS",
+      "length" : 60
+    },
+    {
+      "name" : "ADDR",
+      "type" : "esriFieldTypeInteger",
+      "alias" : "ADDR"
+    },
+    {
+      "name" : "FRACTION",
+      "type" : "esriFieldTypeString",
+      "alias" : "FRACTION",
+      "length" : 4
+    },
+    {
+      "name" : "PREFIX",
+      "type" : "esriFieldTypeString",
+      "alias" : "PREFIX",
+      "length" : 2
+    },
+    {
+      "name" : "STREET",
+      "type" : "esriFieldTypeString",
+      "alias" : "STREET",
+      "length" : 40
+    },
+    {
+      "name" : "STREET_TYPE",
+      "type" : "esriFieldTypeString",
+      "alias" : "STREET_TYPE",
+      "length" : 4
+    },
+    {
+      "name" : "SUITE",
+      "type" : "esriFieldTypeString",
+      "alias" : "SUITE",
+      "length" : 10
+    },
+    {
+      "name" : "OWN_NAME",
+      "type" : "esriFieldTypeString",
+      "alias" : "OWN_NAME",
+      "length" : 60
+    },
+    {
+      "name" : "OWN_ADDR",
+      "type" : "esriFieldTypeString",
+      "alias" : "OWN_ADDR",
+      "length" : 40
+    },
+    {
+      "name" : "OWN_CITY",
+      "type" : "esriFieldTypeString",
+      "alias" : "OWN_CITY",
+      "length" : 40
+    },
+    {
+      "name" : "OWN_STATE",
+      "type" : "esriFieldTypeString",
+      "alias" : "OWN_STATE",
+      "length" : 2
+    },
+    {
+      "name" : "OWN_ZIP",
+      "type" : "esriFieldTypeString",
+      "alias" : "OWN_ZIP",
+      "length" : 10
+    },
+    {
+      "name" : "SHAPE.AREA",
+      "type" : "esriFieldTypeDouble",
+      "alias" : "SHAPE.AREA"
+    },
+    {
+      "name" : "SHAPE.LEN",
+      "type" : "esriFieldTypeDouble",
+      "alias" : "SHAPE.LEN"
+    }
+  ],
+  "features" : [
+    {
+      "attributes" : {
+        "OBJECTID" : 576271,
+        "KIVAPIN" : "2866",
+        "LANDUSECODE" : 9500,
+        "APN" : "JA46420050400000000",
+        "ADDRESS" : "2905 E 67th St",
+        "ADDR" : 2905,
+        "FRACTION" : null,
+        "PREFIX" : "E",
+        "STREET" : "67th",
+        "STREET_TYPE" : "St",
+        "SUITE" : null,
+        "OWN_NAME" : "Land Bank of Kansas City Missouri",
+        "OWN_ADDR" : "4900 Swope Pkwy",
+        "OWN_CITY" : "Kansas City",
+        "OWN_STATE" : "MO",
+        "OWN_ZIP" : "64130",
+        "SHAPE.AREA" : 4346.1596874999996,
+        "SHAPE.LEN" : 318.53267550445503
+      },
+      "geometry" : {
+        "rings" : [
+          [
+            [
+              2773687.8966669682,
+              1033368.5300002992
+            ],
+            [
+              2773687.9466669653,
+              1033369.6383336335
+            ],
+            [
+              2773693.1716669668,
+              1033492.7466669679
+            ],
+            [
+              2773709.8216669653,
+              1033491.7716669664
+            ],
+            [
+              2773728.0800002981,
+              1033490.6883336306
+            ],
+            [
+              2773722.8133336324,
+              1033366.5383336321
+            ],
+            [
+              2773687.8966669682,
+              1033368.5300002992
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "attributes" : {
+        "OBJECTID" : 481251,
+        "KIVAPIN" : "10931",
+        "LANDUSECODE" : 1125,
+        "APN" : "JA28320261400000000",
+        "ADDRESS" : "1003 Benton Blvd",
+        "ADDR" : 1003,
+        "FRACTION" : null,
+        "PREFIX" : null,
+        "STREET" : "Benton",
+        "STREET_TYPE" : "Blvd",
+        "SUITE" : null,
+        "OWN_NAME" : "Land Bank of Kansas City Missouri",
+        "OWN_ADDR" : "4900 Swope Pkwy 2nd Fl",
+        "OWN_CITY" : "Kansas City",
+        "OWN_STATE" : "MO",
+        "OWN_ZIP" : "64130",
+        "SHAPE.AREA" : 3976.0223958333299,
+        "SHAPE.LEN" : 320.22901740516602
+      },
+      "geometry" : {
+        "rings" : [
+          [
+            [
+              2776169.8133336324,
+              1068400.4800002947
+            ],
+            [
+              2776175.6133336332,
+              1068529.738333635
+            ],
+            [
+              2776206.3966669682,
+              1068528.2716669664
+            ],
+            [
+              2776206.3466669675,
+              1068527.1633336321
+            ],
+            [
+              2776200.4716669675,
+              1068400.1383336335
+            ],
+            [
+              2776200.4216669668,
+              1068399.0300002992
+            ],
+            [
+              2776169.8133336324,
+              1068400.4800002947
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
