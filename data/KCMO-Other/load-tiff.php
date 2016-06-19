@@ -24,7 +24,6 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
             print "\nBAD\n";
             $this->help();
         } else {
-print "\n$DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS\n";
 
             parent::__construct($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS, $debug);
 
@@ -41,6 +40,24 @@ print "\n$DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_C
 
     function load_spatial() {
 
+        $sql = "SELECT fid, name, ordnum, status  FROM kcmo_tiff_fdw LIMIT 5;";
+
+
+        $this->list_query = $this->spatial_dbh->prepare("$sql  -- " . __FILE__ . ' ' . __LINE__);
+
+
+        try {
+            $this->list_query->execute();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage() . ' ' . __FILE__ . ' ' . __LINE__);
+            print "ERROR " . $e->getMessage() . ' ' . __FILE__ . ' ' . __LINE__;
+            //throw new Exception('Unable to query database');
+            return false;
+        }
+        $data = $this->list_query->fetchAll(PDO::FETCH_ASSOC);
+print "\n-----\n";
+        print_r ($data);
+        print "\n-----\n";
     }
 
     function load()

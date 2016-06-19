@@ -19,3 +19,6 @@ CREATE FOREIGN TABLE kcmo_tiff_fdw (
   shape_area real )
   SERVER kcmo_other_server
   OPTIONS ( layer 'IncentiveTaxIncrementFinancing' );
+
+ALTER SERVER kcmo_other_server OWNER TO c4kc;
+ALTER FOREIGN TABLE kcmo_tiff_fdw        OWNER TO c4kc;
