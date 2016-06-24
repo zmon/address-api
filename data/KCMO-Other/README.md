@@ -274,3 +274,23 @@ class KCMO_Tiff extends BaseTable
 
 
 99) Teardown FWD server
+
+
+UPDATE GIS
+
+When we add remember    IDs gis_ids_added 
+When we change remember IDs gis_ids_changed
+
+Mark all 'DELETED' that are not in gis_ids_added and gis_ids_changed 
+and remember IDS'  gis_ids_deleted
+
+
+UPDATE Address
+
+For all addresses in gis_ids_deleted remove TIF info
+For all addresses in gis_ids_added Add TIF info
+For all addresses in gis_ids_changed Update TIF info
+
+
+
+

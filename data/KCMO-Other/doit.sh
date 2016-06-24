@@ -74,7 +74,7 @@ cp Other.zip /tmp
 
 (
     cd /tmp
-    rm -rf Other
+    rm -rf Other.gdb
 
     # curl http://maps.kcmo.org/apps/download/GisDataDownload/Other.gdb.zip > Other.zip
 

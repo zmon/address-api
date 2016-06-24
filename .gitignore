@@ -6,3 +6,4 @@ dumps
 vendor
 composer.lock
 .vagrant
+data/KCMO-Other/Other.zip

@@ -11,9 +11,25 @@ ini_set("auto_detect_line_endings", true);
 class KCMOTIF extends \Code4KC\Address\SpatialLoad
 {
 
+    var $spatial_fields_to_update = array(
+        'name',
+        'fid',
+        'geom',
+        'ordnum',
+        'status',
+        'amendment',
+        'lastupdate',
+        'shape_length',
+        'shape_area',
+        'active'
+    );
+
+    var $active_spatial_ids = array();
+    var $inactive_spatial_ids = array();
+
     var $totals = array(
-        'input' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
-        'tiff' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
+        'spatial' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
+        'tif' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
     );
 
     function __construct($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS, $debug = false)
@@ -27,7 +43,7 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
 
             parent::__construct($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS, $debug);
 
-        //    $this->display_cli_options($DB_NAME, $spatial_DB_NAME);
+            //    $this->display_cli_options($DB_NAME, $spatial_DB_NAME);
 
             $this->load_spatial();
             $this->load();
@@ -38,13 +54,14 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
     }
 
 
-    function load_spatial() {
+    function load_spatial()
+    {
 
-        $sql = "SELECT fid, name, ordnum, status  FROM kcmo_tiff_fdw LIMIT 5;";
+        $Tif = new \Code4KC\Address\Tif($this->spatial_dbh, true);
 
+        $sql = "SELECT *  FROM kcmo_tiff_fdw LIMIT 7;";
 
         $this->list_query = $this->spatial_dbh->prepare("$sql  -- " . __FILE__ . ' ' . __LINE__);
-
 
         try {
             $this->list_query->execute();
@@ -54,15 +71,79 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
             //throw new Exception('Unable to query database');
             return false;
         }
-        $data = $this->list_query->fetchAll(PDO::FETCH_ASSOC);
-print "\n-----\n";
-        print_r ($data);
-        print "\n-----\n";
+        $records = $this->list_query->fetchAll(PDO::FETCH_ASSOC);
+
+
+        foreach ($records AS $rec) {
+
+            $data = $rec;
+            $this->row++;
+
+
+            $fid = $data['fid'];
+            $data['active'] = 1;
+
+            if ($current_record = $Tif->find_by_fid($fid)) {
+
+                $this->active_spatial_ids[] = $current_record['id'];
+
+                $changes = $Tif->is_same($data, $current_record, $this->spatial_fields_to_update);
+
+                $number_of_changes = count($changes);
+
+                if ($number_of_changes > 0) {
+
+                    if (array_key_exists('active', $changes)) {                  // Are we reactivating
+                        $this->totals['spatial']['re-activate']++;
+                        if ($number_of_changes > 1) {                            // and are there other changes
+                            $this->totals['spatial']['update']++;
+                        }
+                    } else {
+                        $this->totals['spatial']['update']++;                    // We only have changes NO reactivating
+                    }
+
+                    if ($this->verbose) {
+                        $this->display_record($this->row, 'Change', $data);
+                    }
+
+                    if (!$this->dry_run && $Tif->save_changes($current_record['id'], $changes)) {
+                    }
+
+                } else {
+
+                    $this->totals['spatial']['N/A']++;
+
+                    if ($this->verbose) {
+                        $this->display_record($this->row, 'N/A', $data);
+                    }
+                }
+            } else {
+                $this->totals['spatial']['insert']++;
+
+                if ($this->verbose) {
+                    $this->display_record($this->row, 'Add', $data);
+                }
+
+                if ($id = $Tif->add($data)) {
+                    $this->active_spatial_ids[] = $id;
+                }
+            }
+        }
+
+        if (!$this->dry_run && count($this->active_spatial_ids)) {
+            $this->totals['spatial']['inactive'] = $Tif->mark_inactive_if_not_in($this->active_spatial_ids);
+        }
+
     }
+
 
     function load()
     {
-        $CityAddressAttributes = new \Code4KC\Address\CityAddressAttributes($this->dbh, true);
+
+        print "\n UNCOMMENT LOAD\n";
+        return;
+
+        $Tif = new \Code4KC\Address\Tif($this->dbh, true);
 
         if (!empty($this->input_file)) {
             if (file_exists($this->input_file)) {
@@ -73,7 +154,7 @@ print "\n-----\n";
             }
         } else {
 
-            print "\n".$this->parameters."\n";
+            print "\n" . $this->parameters . "\n";
             $json = $this->get_data_curl($this->input_url, $this->parameters);
             $records = json_decode($json, true);        // Convert JSON into an array
         }
@@ -86,26 +167,26 @@ print "\n-----\n";
 
             /**
              *     [features] => Array(
-            [0] => Array(
-            [attributes] => Array(
-            [OBJECTID] => 592422
-            [KIVAPIN] => 47371
-            [LANDUSECODE] => 9500
-            [APN] => JA27530020101000000
-            [ADDRESS] =>
-            [ADDR] =>
-            [FRACTION] =>
-            [PREFIX] =>
-            [STREET] =>
-            [STREET_TYPE] =>
-            [SUITE] =>
-            [OWN_NAME] => Land Bank of Kansas City Missouri
-            [OWN_ADDR] => 4900 Swope Pkwy
-            [OWN_CITY] => Kansas City
-            [OWN_STATE] => MO
-            [OWN_ZIP] => 64130
-            [SHAPE.AREA] => 979.35888888889
-            [SHAPE.LEN] => 158.40463690498
+             * [0] => Array(
+             * [attributes] => Array(
+             * [OBJECTID] => 592422
+             * [KIVAPIN] => 47371
+             * [LANDUSECODE] => 9500
+             * [APN] => JA27530020101000000
+             * [ADDRESS] =>
+             * [ADDR] =>
+             * [FRACTION] =>
+             * [PREFIX] =>
+             * [STREET] =>
+             * [STREET_TYPE] =>
+             * [SUITE] =>
+             * [OWN_NAME] => Land Bank of Kansas City Missouri
+             * [OWN_ADDR] => 4900 Swope Pkwy
+             * [OWN_CITY] => Kansas City
+             * [OWN_STATE] => MO
+             * [OWN_ZIP] => 64130
+             * [SHAPE.AREA] => 979.35888888889
+             * [SHAPE.LEN] => 158.40463690498
              */
 
             $data['kivapin'] = $record['KIVAPIN'];
@@ -114,8 +195,7 @@ print "\n-----\n";
             $this->row++;
 
 
-
-            if ( false /* !$CityAddressAttributes->load_and_validate($data) */) {
+            if (false /* !$CityAddressAttributes->load_and_validate($data) */) {
                 $this->display_rejected_record($this->row, $data, $CityAddressAttributes->error_messages);
                 $this->totals['input']['error']++;
             } else {
@@ -145,21 +225,21 @@ print "\n-----\n";
                         }
 
                         $active_ids[] = $current_record['id'];
-                        $this->totals['land_bank_parcels']['update']++;
+                        $this->totals['tif']['update']++;
                     } else {
                         if ($this->verbose) {
                             $this->display_record($this->row, 'N/A', $data);
                         }
 
-                        $this->totals['land_bank_parcels']['N/A']++;
+                        $this->totals['tif']['N/A']++;
                         $active_ids[] = $current_record['id'];
                     }
 
                 } else {
-                    $this->totals['land_bank_parcels']['error']++;
+                    $this->totals['tif']['error']++;
                     //                   if ($this->verbose) {
                     $this->display_record($this->row, 'Add', $data);
-                    print_r($record);
+
                     //                   }
 
 
@@ -200,7 +280,6 @@ print "\n-----\n";
     }
 
 }
-
 
 
 $run = new KCMOTIF($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS);
