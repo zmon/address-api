@@ -7,7 +7,7 @@ use PDO as PDO;
 /**
  * Class KCMO_Tif
  */
-class Tif extends BaseTable
+class SpatialTable extends BaseTable
 {
     var $table_name = 'address_spatial.kcmo_tif';
     var $primary_key_sequence = 'address_spatial.kcmo_tif_id_seq';
@@ -26,6 +26,17 @@ class Tif extends BaseTable
     );
 
     var $fid_query = null;
+
+    function __construct(&$dbh, $debug = false)
+    {
+
+        $this->dbh = $dbh;
+
+        if ($debug) {
+            $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
+    }
+
 
     /**
      * @param $id

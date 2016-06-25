@@ -57,9 +57,9 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
     function load_spatial()
     {
 
-        $Tif = new \Code4KC\Address\Tif($this->spatial_dbh, true);
+        $this->Spatial = new \Code4KC\Address\SpatialTable($this->spatial_dbh, true);
 
-        $sql = "SELECT *  FROM kcmo_tiff_fdw LIMIT 7;";
+        $sql = "SELECT *  FROM kcmo_tiff_fdw LIMIT 5;";
 
         $this->list_query = $this->spatial_dbh->prepare("$sql  -- " . __FILE__ . ' ' . __LINE__);
 
@@ -83,11 +83,11 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
             $fid = $data['fid'];
             $data['active'] = 1;
 
-            if ($current_record = $Tif->find_by_fid($fid)) {
+            if ($current_record = $this->Spatial->find_by_fid($fid)) {
 
                 $this->active_spatial_ids[] = $current_record['id'];
 
-                $changes = $Tif->is_same($data, $current_record, $this->spatial_fields_to_update);
+                $changes = $this->Spatial->is_same($data, $current_record, $this->spatial_fields_to_update);
 
                 $number_of_changes = count($changes);
 
@@ -106,7 +106,7 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
                         $this->display_record($this->row, 'Change', $data);
                     }
 
-                    if (!$this->dry_run && $Tif->save_changes($current_record['id'], $changes)) {
+                    if (!$this->dry_run && $this->Spatial->save_changes($current_record['id'], $changes)) {
                     }
 
                 } else {
@@ -124,14 +124,14 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
                     $this->display_record($this->row, 'Add', $data);
                 }
 
-                if ($id = $Tif->add($data)) {
+                if ($id = $this->Spatial->add($data)) {
                     $this->active_spatial_ids[] = $id;
                 }
             }
         }
 
         if (!$this->dry_run && count($this->active_spatial_ids)) {
-            $this->totals['spatial']['inactive'] = $Tif->mark_inactive_if_not_in($this->active_spatial_ids);
+            $this->totals['spatial']['inactive'] = $this->Spatial->mark_inactive_if_not_in($this->active_spatial_ids);
         }
 
     }
