@@ -38,9 +38,16 @@ CREATE TABLE address_spatial.kcmo_tif (
   CONSTRAINT pk_kcmo_nhood_fid PRIMARY KEY (fid)
 );
 
+ALTER TABLE address_spatial.kcmo_tif ALTER COLUMN geom  TYPE geometry(MultiPolygon, 4326) USING ST_Transform(geom, 4326);
+
 CREATE INDEX idx_kcmo_tif ON
   address_spatial.kcmo_tif
 USING gist(geom);
 
 ALTER TABLE address_spatial.kcmo_tif OWNER TO c4kc;
+
+\c address_api
+
+ALTER TABLE  city_address_attributes ADD COLUMN tif varchar;
+
 

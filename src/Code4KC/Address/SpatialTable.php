@@ -11,6 +11,7 @@ class SpatialTable extends BaseTable
 {
     var $table_name = 'address_spatial.kcmo_tif';
     var $primary_key_sequence = 'address_spatial.kcmo_tif_id_seq';
+    var $query = null;
     var $list_query = null;
     var $fields = array(
         'id' => '',
@@ -37,6 +38,24 @@ class SpatialTable extends BaseTable
         }
     }
 
+    function find_name_by_lng_lat( $lng, $lat ) {
+        if (!$this->query) {
+            $sql = 'SELECT name  FROM ' . $this->table_name . ' WHERE ST_Intersects( ST_MakePoint( :lng, :lat)::geography::geometry, geom);';
+            $this->query = $this->dbh->prepare("$sql  -- " . __FILE__ . ' ' . __LINE__);
+        }
+
+        try {
+            $this->query->execute(array(':lat' => $lat, ':lng' => $lng));
+        } catch (PDOException  $e) {
+            error_log($e->getMessage() . ' ' . __FILE__ . ' ' . __LINE__);
+            //throw new Exception('Unable to query database');
+            return false;
+        }
+
+        return $this->query->fetch(PDO::FETCH_ASSOC);
+    }
+
+
 
     /**
      * @param $id
@@ -53,8 +72,8 @@ class SpatialTable extends BaseTable
                      FROM (SELECT 'Feature' As type
                         , ST_AsGeoJSON(lg.geom)::json As geometry
                         , row_to_json(lp) As properties
-                       FROM address_spatial.kcmo_tiff As lg
-                             INNER JOIN (SELECT fid, name FROM address_spatial.kcmo_tiff) As lp
+                       FROM " . $this->table_name . " As lg
+                             INNER JOIN (SELECT fid, name FROM " . $this->table_name . ") As lp
                            ON lg.fid = lp.fid  ORDER BY lg.name) As f )  As fc;";
             $this->list_query = $this->dbh->prepare("$sql  -- " . __FILE__ . ' ' . __LINE__);
         }

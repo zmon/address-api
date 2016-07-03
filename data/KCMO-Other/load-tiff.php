@@ -29,7 +29,7 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
 
     var $totals = array(
         'spatial' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
-        'tif' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
+        'city_address_attributes' => array('insert' => 0, 'update' => 0, 'inactive' => 0, 're-activate' => 0, 'N/A' => 0, 'error' => 0),
     );
 
     function __construct($DB_NAME, $DB_USER, $DB_PASS, $DB_CODE4KC_NAME, $DB_CODE4KC_USER, $DB_CODE4KC_PASS, $debug = false)
@@ -45,6 +45,7 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
 
             //    $this->display_cli_options($DB_NAME, $spatial_DB_NAME);
 
+            $this->Spatial = new \Code4KC\Address\SpatialTable($this->spatial_dbh, true);
             $this->load_spatial();
             $this->load();
             $this->end_load();
@@ -57,9 +58,9 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
     function load_spatial()
     {
 
-        $this->Spatial = new \Code4KC\Address\SpatialTable($this->spatial_dbh, true);
 
-        $sql = "SELECT *  FROM kcmo_tiff_fdw LIMIT 5;";
+
+        $sql = "SELECT fid, geom::geography::geometry AS geom, name, ordnum, status, amendment, lastupdate, shape_length, shape_area  FROM public.incentivetaxincrementfinancing;";
 
         $this->list_query = $this->spatial_dbh->prepare("$sql  -- " . __FILE__ . ' ' . __LINE__);
 
@@ -124,7 +125,7 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
                     $this->display_record($this->row, 'Add', $data);
                 }
 
-                if ($id = $this->Spatial->add($data)) {
+                if (!$this->dry_run && $id = $this->Spatial->add($data)) {
                     $this->active_spatial_ids[] = $id;
                 }
             }
@@ -133,6 +134,8 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
         if (!$this->dry_run && count($this->active_spatial_ids)) {
             $this->totals['spatial']['inactive'] = $this->Spatial->mark_inactive_if_not_in($this->active_spatial_ids);
         }
+//$sql = "ALTER TABLE address_spatial.kcmo_tif ALTER COLUMN geom  TYPE geometry(MultiPolygon, 4326) USING ST_Transform(geom, 4326);";
+//        $alter_ret = $this->spatial_dbh->exec($sql);
 
     }
 
@@ -140,113 +143,72 @@ class KCMOTIF extends \Code4KC\Address\SpatialLoad
     function load()
     {
 
-        print "\n UNCOMMENT LOAD\n";
-        return;
+        $address = new \Code4KC\Address\Address($this->dbh, true);
+        $city_address_attributes = new \Code4KC\Address\CityAddressAttributes($this->dbh, true);
 
-        $Tif = new \Code4KC\Address\Tif($this->dbh, true);
 
-        if (!empty($this->input_file)) {
-            if (file_exists($this->input_file)) {
-                $records = $this->get_data_file($this->input_file);
-            } else {
-                print "\nERROR: input file " . $this->input_file . " was not found or readable.\n";
-                return;
-            }
-        } else {
+        $sql = 'SELECT a.id, a.longitude, a.latitude, k.city_address_id FROM address a
+                LEFT JOIN address_keys k ON ( k.address_id = a.id)
+                LEFT JOIN census_attributes c ON ( k.city_address_id = c.city_address_id) ';
 
-            print "\n" . $this->parameters . "\n";
-            $json = $this->get_data_curl($this->input_url, $this->parameters);
-            $records = json_decode($json, true);        // Convert JSON into an array
+
+        $query = $this->dbh->prepare("$sql  -- " . __FILE__ . ' ' . __LINE__);
+
+        try {
+            $query->execute();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage() . ' ' . __FILE__ . ' ' . __LINE__);
+            //throw new Exception('Unable to query database');
+            return false;
         }
-
-        $active_ids = array();
-
-        foreach ($records['features'] AS $rec) {
-
-            $record = $rec['attributes'];
-
-            /**
-             *     [features] => Array(
-             * [0] => Array(
-             * [attributes] => Array(
-             * [OBJECTID] => 592422
-             * [KIVAPIN] => 47371
-             * [LANDUSECODE] => 9500
-             * [APN] => JA27530020101000000
-             * [ADDRESS] =>
-             * [ADDR] =>
-             * [FRACTION] =>
-             * [PREFIX] =>
-             * [STREET] =>
-             * [STREET_TYPE] =>
-             * [SUITE] =>
-             * [OWN_NAME] => Land Bank of Kansas City Missouri
-             * [OWN_ADDR] => 4900 Swope Pkwy
-             * [OWN_CITY] => Kansas City
-             * [OWN_STATE] => MO
-             * [OWN_ZIP] => 64130
-             * [SHAPE.AREA] => 979.35888888889
-             * [SHAPE.LEN] => 158.40463690498
-             */
-
-            $data['kivapin'] = $record['KIVAPIN'];
-            $data['land_bank_property'] = 1;
-
-            $this->row++;
+        $row = 0;
+        $count = 0;
+        while ($rec = $query->fetch(PDO::FETCH_ASSOC)) {
 
 
-            if (false /* !$CityAddressAttributes->load_and_validate($data) */) {
-                $this->display_rejected_record($this->row, $data, $CityAddressAttributes->error_messages);
-                $this->totals['input']['error']++;
-            } else {
+            $row++;
+            $lng = $rec['longitude'];
+            $lat = $rec['latitude'];
+            $city_address_id = $rec['city_address_id'];
+
+            if (empty($city_address_id)) {
+                $this->totals['city_address_attributes']['input']['N/A']++;
+                continue;
+            }
 
 
-                $fields_to_update = array(
-                    'land_bank_property',
-                );
 
-                $city_id = $data['kivapin'];
+            $cc_rec = $this->Spatial->find_name_by_lng_lat($lng, $lat);
 
-                if ($current_record = $CityAddressAttributes->find_by_id($city_id)) {
 
-                    $changes = $CityAddressAttributes->is_same($data, $current_record, $fields_to_update);
+            if ($row % 1000 == 0 ) print ".";
 
-                    if (count($changes)) {
+            if ( $cc_rec ) {       // We found a shape this address is in
 
-                        if ($this->verbose) {
-                            $this->display_record($this->row, 'Change', $data);
+                $count++;
+
+                $cc_rec['tif'] = $cc_rec['name'];                                       // rename to source table field
+                unset($cc_rec['name']);
+
+                $new_rec = array('tif' => $cc_rec['tif']);
+
+                if ($city_address_attributes_rec = $city_address_attributes->find_by_id($city_address_id)) {
+                    $city_address_attributes_id = $city_address_attributes_rec['id'];
+
+                    if ($city_address_attribute_differences = $city_address_attributes->diff($city_address_attributes_rec, $new_rec)) {
+                        if (!$this->dry_run) {
+                            $city_address_attributes->update($city_address_attributes_id, $city_address_attribute_differences);
                         }
-
-                        if (!$this->dry_run
-                            //                       && $current_record['active']
-                            && $CityAddressAttributes->save_changes($current_record['id'], $changes)
-                        ) {
-
-                        }
-
-                        $active_ids[] = $current_record['id'];
-                        $this->totals['tif']['update']++;
+                        $this->totals['city_address_attributes']['update']++;
                     } else {
-                        if ($this->verbose) {
-                            $this->display_record($this->row, 'N/A', $data);
-                        }
-
-                        $this->totals['tif']['N/A']++;
-                        $active_ids[] = $current_record['id'];
+                        $this->totals['city_address_attributes']['N/A']++;
                     }
-
                 } else {
-                    $this->totals['tif']['error']++;
-                    //                   if ($this->verbose) {
-                    $this->display_record($this->row, 'Add', $data);
-
-                    //                   }
-
-
-//                    if ($id = $CityAddressAttributes->add($data)) {
-//                        $active_ids[] = $id;
-//                    }
+                                                                                        // We are not adding new addresses,
+                                                                                        // this would be some sort of an error
+                    $this->totals['city_address_attributes']['error']++;
                 }
+
             }
         }
 

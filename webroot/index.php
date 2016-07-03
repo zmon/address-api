@@ -20,13 +20,13 @@ var_dump($in_state);
 
 });
 
-$app->get('/kcmo_tiffs/V0/', function () use ($app) {
+$app->get('/kcmo_tifs/V0/', function () use ($app) {
 
 
 
     if ($dbh = connect_to_spatial_database()) {
 
-        $address = new \Code4KC\Address\Tiff($dbh, true);
+        $address = new \Code4KC\Address\SpatialTable($dbh, true);
 
         if ($address_recs = $address->findallgeo()) {
 
