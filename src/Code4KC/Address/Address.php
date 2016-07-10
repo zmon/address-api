@@ -35,6 +35,7 @@ class Address extends BaseTable
 
     VAR $base_sql = 'SELECT
                 a.id AS address_id,
+                a.street_address,
                 a.single_line_address,
                 a.city,
                 a.state,
@@ -52,6 +53,7 @@ class Address extends BaseTable
                 c.nhood AS city_nhood,
                 c.council_district AS city_council_district,
                 c.land_bank_property AS city_land_bank_property,
+                c.tif AS city_tif,
 
                 k.county_address_id AS county_id,
                 b.block_2010_name AS census_block_2010_name,
